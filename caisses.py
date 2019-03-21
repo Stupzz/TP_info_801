@@ -20,7 +20,7 @@ class Caisse(Patron):
     def attente_msg(self):
         msg = self.child.recv()
         print(msg)
-        if msg.type == Message.NEW_CONDUCTEUR:
+        if msg.type == Message.AFFICHE_POMPE:
 
 
         elif msg.type == Message.STOP:
