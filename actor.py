@@ -15,8 +15,13 @@ class Actor():
 
 
     def run(self):
+        threading.Thread(target=self.get_msg())
         while self.command():
             sleep(0.2)
+
+    def get_msg(self):
+        while self.attente_msg():
+            pass
 
     def command(self):
         print("Commands: ajoutClient, selectionClient, stop?")
@@ -46,6 +51,16 @@ class Actor():
             # self.envoie_message('Plateforme', message)
             # self.envoie_message('Transit', message)
             return False
+
+        return True
+
+    def attente_msg(self):
+        # msg = self.child.recv()
+        # print(msg)
+        # if msg.type == Message.GET_CODE:
+        #
+        # elif msg.type == Message.STOP:
+        #     return False
 
         return True
 

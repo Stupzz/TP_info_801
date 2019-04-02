@@ -1,11 +1,10 @@
 class Message:
-    #pour les conducteurs
-    NEW_CONDUCTEUR = "new conducteur"
-    CHOIX_CONDUCTEUR = "choix conducteur"
-    CHOIX_CAISSE = "choix caisse"
-    REPONSE_CAISSE = "reponse caisse"
-    PRINT_TRAINS = "print trains"
-    VIDE_GARE = "vide gare"
+    #pour la caisse
+    GET_CODE = "get code" #Pour client également
+
+    #Pour pompe
+    ADD_CARBURANT = "add carburant"
+
 
     #Pour caisse
     AFFICHE_POMPE = "affiche pompe"
@@ -19,11 +18,11 @@ class Message:
 
     STOP = "stop"
 
-    def __init__(self, type, contenue, accept=None):
+    def __init__(self, type, contenue, client=None):
         self.type = type
         self.contenue = contenue
-        self.accept = accept
+        self.client = client
 
     def __str__(self):
-        return "Message: " + str(self.type) + ". Contient le train: " + str(self.train) + ". La réponse est: " + str(self.accept) + "."
+        return "Message: " + str(self.type) + ". Contient: " + str(self.contenue) + ". Avec le client: " + self.client + "."
 
