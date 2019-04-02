@@ -11,6 +11,7 @@ class Actor():
 
     def __init__(self):
         self.clients = []
+        self.client_selectionne = None
 
 
     def run(self):
@@ -27,7 +28,16 @@ class Actor():
             print(f"Le client suivant vient d'être ajouté: {client}")
 
         elif command == 'selectionClient':
+            for i in range(len(self.clients)):
+                print(f"{i + 1} - {self.clients[i].nom}")
 
+            choix = int(input("Quel client souhaitez vous selectionner? (index)")) - 1
+            while (choix < 0 and choix >= len(self.clients)):
+                print("Veuillez selectionner un index correct")
+                choix = int(input("Quel client souhaitez vous selectionner? (index)")) - 1
+
+            self.client_selectionne = self.clients[choix]
+            print(f"Vous venez de selectionner {self.client_selectionne.nom}")
         elif command == 'stop':
 
             # self.envoie_message('Operateur', message)
