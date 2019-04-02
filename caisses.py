@@ -32,12 +32,12 @@ class Caisse(Patron):
             if code == None:
                 code = self.genere_code()
                 self.codes.append(code)
-                contenue_json = { "code" : code}
+                contenue_json = {"code": code}
                 msg_send = Message(Message.GET_CODE, json.dumps(contenue_json), None)
                 self.envoie_message("Actor", msg_send)
                 print(f"Message envoyer vers client depuis la caisse: {msg_send}")
 
-            contenue_json = {"code": code, "typeCarburant": msg.client.carburant, "quantite" : contenue["quantite"]}
+            contenue_json = {"code": code, "typeCarburant": msg.client.carburant, "quantite": contenue["quantite"]}
             msg_send = Message(Message.GET_CODE, json.dumps(contenue_json), None)
             self.envoie_message("Pompe", msg_send)
             print(f"Message envoyer vers pompe depuis la caisse: {msg_send}")
@@ -47,13 +47,12 @@ class Caisse(Patron):
 
         return True
 
-
-
     def genere_code(self):
         code = randint(0, 9999)
         while code in self.codes:
             code = randint(0, 9999)
         return code
+
 
 class Carburant:
     def __init__(self, name, prix_par_litre):

@@ -1,19 +1,12 @@
 class Message:
-    #pour la caisse
+    #pour la caisse/le client/les pompes
     GET_CODE = "get code" #Pour client également
 
     #Pour pompe
     ADD_CARBURANT = "add carburant"
 
+    PRINT_POMPE_CARBURANT_DISPONNIBLE = "print pompe carburant disponnible"
 
-    #Pour caisse
-    AFFICHE_POMPE = "affiche pompe"
-    SELECT_POMPE = "select pompe"
-    ENTREE_TRAIN = "entree train"
-
-    #Pour le transit
-    START_TRANSIT = "start transit"
-    FIN_TRANSIT = "fin de transit"
 
 
     STOP = "stop"
