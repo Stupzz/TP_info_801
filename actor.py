@@ -38,6 +38,7 @@ class Actor():
 
             self.client_selectionne = self.clients[choix]
             print(f"Vous venez de selectionner {self.client_selectionne.nom}")
+
         elif command == 'stop':
 
             # self.envoie_message('Operateur', message)
@@ -55,9 +56,14 @@ class Actor():
         return False
 
     def creer_client(self):
-        client = Client(input("Quel nom voulez vous pour votre client?"), 0, 0)
+        client = Client(input("Quel nom voulez vous pour votre client?"))
         while self.deja_client(client):
             client.nom = input("Nom client déjà utilisé. Quel nom voulez vous pour votre client?")
+
+        carburant = input(f"Quel est le type de carburant qu'utilise le véhicule de {client.nom}? (diesel/essence)")
+        while carburant != "diesel" and carburant != "essence" :
+            carburant = input("Veuillez saisir un carburant valide. (diesel/essence)")
+        client.carburant = carburant
 
         capacite_reservoir = int(input(f"Quel est la capacite de reservoir du véhicule de {client.nom}?"))
         while capacite_reservoir < 0:
@@ -65,7 +71,6 @@ class Actor():
         client.capacite_reservoir = capacite_reservoir
 
         choix = input(f"Voulez vous préremplir votre réservoir? (y/n)")
-        print(choix)
         while choix != "y" and choix != "n" :
             print("Veuillez saisir une valeure correcte.")
             choix = input(f"Voulez vous préremplir votre réservoir? (y/n)")
@@ -82,7 +87,7 @@ class Actor():
 
 
 class Client():
-    def __init__(self, nom, capacite_reservoir, quantite_reservoir):
+    def __init__(self, nom):
         """
         creer un client, avec un code null
         :param nom: Nom du client
@@ -90,8 +95,9 @@ class Client():
         :param quantite_reservoir: la quantite de carburant déjà présente dans le véhicule
         """
         self.nom = nom
-        self.capacite_reservoir = capacite_reservoir
-        self.quantite_reservoir = quantite_reservoir
+        self.carburant = None
+        self.capacite_reservoir = 0
+        self.quantite_reservoir = 0
         self.code = None
 
 
@@ -120,7 +126,7 @@ class Client():
             return self.nom == other.nom
 
     def __str__(self):
-        return f"{self.nom} a un véhicule pouvant contenir {self.capacite_reservoir} litre de carburant. Son reservoir est déjà rempli avec {self.quantite_reservoir} litre de carburant."
+        return f"{self.nom} a un véhicule pouvant contenir {self.capacite_reservoir} litre de {self.carburant}. Son reservoir est déjà rempli avec {self.quantite_reservoir} litre."
 
 
 if __name__ == "__main__":
