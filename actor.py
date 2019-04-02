@@ -18,11 +18,15 @@ class Actor():
             sleep(0.2)
 
     def command(self):
-        print("Commands: ajoutClient, stop?")
+        print("Commands: ajoutClient, selectionClient, stop?")
         command = input()
 
         if command == 'ajoutClient':
             client = self.creer_client()
+            self.clients.append(client)
+            print(f"Le client suivant vient d'être ajouté: {client}")
+
+        elif command == 'selectionClient':
 
         elif command == 'stop':
 
@@ -63,8 +67,7 @@ class Actor():
                 quantite_reservoir = int(input("Veuillez saisir une quantite > 0"))
             client.ajoute_carburant(quantite_reservoir)
 
-        self.clients.append(client)
-        print(f"Le client suivant vient d'être ajouté: {client}")
+        return client
 
 
 
