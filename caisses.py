@@ -39,7 +39,7 @@ class Caisse(Patron):
 
             contenue_json = {"code": code, "typeCarburant": msg.client.carburant, "quantite": contenue["quantite"]}
             msg_send = Message(Message.GET_CODE, json.dumps(contenue_json), None)
-            self.envoie_message("Pompe", msg_send)
+            self.envoie_message("Pompes", msg_send)
             print(f"Message envoyer vers pompe depuis la caisse: {msg_send}")
 
         elif msg.type == Message.STOP:

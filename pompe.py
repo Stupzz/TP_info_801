@@ -42,6 +42,7 @@ class Pompes(Patron):
                 if pompe.type_carburant == carburant and pompe.disponible:
                     pompes_disponnible.append(pompe)
             pompes_disponnible.sort(key=lambda p: p.id) #on trie pour un affiche par id croissant
+            print("Voici les pompes disponnible:")
             for pompe in pompes_disponnible:
                 print(pompe)
         elif msg.type == Message.STOP:

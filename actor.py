@@ -21,8 +21,9 @@ class Actor(Patron):
             pass
 
     def command(self):
-        print("Commands: ajoutClient, selectionClient, ajouteCarburant, stop?")
+        print("Commands: ajoutClient, selectionClient, ajouteCarburantCode, affichePompe, stop?")
         command = input()
+
         if command == 'ajoutClient':
             client = self.creer_client()
             self.clients.append(client)
@@ -40,13 +41,19 @@ class Actor(Patron):
             self.client_selectionne = self.clients[choix]
             print(f"Vous venez de selectionner {self.client_selectionne.nom}")
 
-        elif command == 'ajouteCarburant':
+        elif command == 'ajouteCarburantCode':
             quantite = int(input("Quelle quantite de carburant souhaitez vous?"))
             while quantite < 0:
                 print("Veuillez selectionner une quantite superieur à 0")
                 quantite = int(input("Quelle quantite de carburant souhaitez vous?")) - 1
             contenue_json = {"quantite": quantite}
             self.envoie_message('Caisse', Message(Message.GET_CODE, json.dumps(contenue_json), self.client_selectionne))
+
+        elif command == 'affichePompe':
+            contenue_json = {"typeCarburant": self.client_selectionne.carburant}
+            msg_send = Message(Message.GET_CODE, json.dumps(contenue_json), None)
+            self.envoie_message("Pompes", msg_send)
+
 
         elif command == 'stop':
 
@@ -55,7 +62,6 @@ class Actor(Patron):
             # self.envoie_message('Plateforme', message)
             # self.envoie_message('Transit', message)
             return False
-
 
         return True
 
