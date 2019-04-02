@@ -18,11 +18,11 @@ class Message:
 
     STOP = "stop"
 
-    def __init__(self, type, contenue, client=None):
+    def __init__(self, type, contenu, client=None):
         self.type = type
-        self.contenue = contenue
+        self.contenu = contenu
         self.client = client
 
     def __str__(self):
-        return "Message: " + str(self.type) + ". Contient: " + str(self.contenue) + ". Avec le client: " + self.client + "."
+        return "Message: " + str(self.type) + ". Contient: " + str(self.contenu) + ". Avec le client: " + self.client + "."
 

@@ -1,18 +1,15 @@
+import json
 from time import sleep
 from patron import Patron
 from message import Message
 import threading
 
 
-class Actor():
-    # def __init__(self, context):
-    #     super(Actor, self).__init__('Actor', context)
-    #     self.clients = []
-
-    def __init__(self):
+class Actor(Patron):
+    def __init__(self, context):
+        super(Actor, self).__init__('Actor', context)
         self.clients = []
         self.client_selectionne = None
-
 
     def run(self):
         threading.Thread(target=self.get_msg())
@@ -24,9 +21,8 @@ class Actor():
             pass
 
     def command(self):
-        print("Commands: ajoutClient, selectionClient, stop?")
+        print("Commands: ajoutClient, selectionClient, ajouteCarburant, stop?")
         command = input()
-
         if command == 'ajoutClient':
             client = self.creer_client()
             self.clients.append(client)
@@ -44,6 +40,8 @@ class Actor():
             self.client_selectionne = self.clients[choix]
             print(f"Vous venez de selectionner {self.client_selectionne.nom}")
 
+        elif command == 'ajouteCarburant':
+            message
         elif command == 'stop':
 
             # self.envoie_message('Operateur', message)
@@ -52,15 +50,17 @@ class Actor():
             # self.envoie_message('Transit', message)
             return False
 
+
         return True
 
     def attente_msg(self):
-        # msg = self.child.recv()
-        # print(msg)
-        # if msg.type == Message.GET_CODE:
-        #
-        # elif msg.type == Message.STOP:
-        #     return False
+        msg = self.child.recv()
+        print(msg)
+        if msg.type == Message.GET_CODE:
+            dict = json.loads(msg.contenu)
+            self.client_selectionne.code = dict["code"]
+        elif msg.type == Message.STOP:
+            return False
 
         return True
 
@@ -76,7 +76,7 @@ class Actor():
             client.nom = input("Nom client déjà utilisé. Quel nom voulez vous pour votre client?")
 
         carburant = input(f"Quel est le type de carburant qu'utilise le véhicule de {client.nom}? (diesel/essence)")
-        while carburant != "diesel" and carburant != "essence" :
+        while carburant != "diesel" and carburant != "essence":
             carburant = input("Veuillez saisir un carburant valide. (diesel/essence)")
         client.carburant = carburant
 
@@ -86,7 +86,7 @@ class Actor():
         client.capacite_reservoir = capacite_reservoir
 
         choix = input(f"Voulez vous préremplir votre réservoir? (y/n)")
-        while choix != "y" and choix != "n" :
+        while choix != "y" and choix != "n":
             print("Veuillez saisir une valeure correcte.")
             choix = input(f"Voulez vous préremplir votre réservoir? (y/n)")
             print(choix)
@@ -98,7 +98,6 @@ class Actor():
             client.ajoute_carburant(quantite_reservoir)
 
         return client
-
 
 
 class Client():
@@ -115,7 +114,6 @@ class Client():
         self.quantite_reservoir = 0
         self.code = None
 
-
     def ajoute_carburant(self, quantite):
         """
         :param quantite: int quantite de carburant a ajouter
@@ -130,7 +128,8 @@ class Client():
         else:
             self.quantite_reservoir += quantite
             capacite_possible_restante = self.capacite_reservoir - self.quantite_reservoir
-            print(f'Vous venez de remplir votre reservoir avec {quantite} litre de carburant. Il vous reste encore {capacite_possible_restante}')
+            print(
+                f'Vous venez de remplir votre reservoir avec {quantite} litre de carburant. Il vous reste encore {capacite_possible_restante}')
             return 0
 
     def __eq__(self, other):
