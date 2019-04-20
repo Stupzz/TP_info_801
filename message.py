@@ -6,6 +6,7 @@ class Message:
     ADD_CARBURANT = "add carburant"
 
     PRINT_POMPE_CARBURANT_DISPONNIBLE = "print pompe carburant disponnible"
+    SERT_CLIENT = "sert client"
 
 
 
@@ -17,5 +18,5 @@ class Message:
         self.client = client
 
     def __str__(self):
-        return "Message: " + str(self.type) + ". Contient: " + str(self.contenu) + ". Avec le client: " + self.client + "."
+        return "Message: " + str(self.type) + ". Contient: " + str(self.contenu) + ". Avec le client: " + str(self.client) + "."
 

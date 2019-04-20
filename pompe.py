@@ -16,8 +16,15 @@ class Pompes(Patron):
         self.pompes = []
         self.codes_essence = dict()
         self.codes_diesel = dict()
+        for i in range(int(nombrePompe)):
+            id = i + 1
+            carburant = "diesel" if i % 2 == 0 else "essence"
+            code = self.codes_diesel if i % 2 == 0 else self.codes_essence
+            pompe = Pompe(id, carburant, code)
+            self.pompes.append(pompe)
 
     def run(self):
+        print("Pompes lancé")
         while self.attente_msg():
             pass
 
@@ -25,26 +32,35 @@ class Pompes(Patron):
         msg = self.child.recv()
         print(msg)
         if msg.type == Message.GET_CODE:
-            dict = json.loads(msg.contenue)
-            codes = None
+            dict = json.loads(msg.contenu)
             if dict["typeCarburant"] == "diesel":
                 codes = self.codes_diesel
             else:
                 codes = self.codes_essence
 
-            codes[dict["code"]] += dict["quantite"]
+            totalEssence = codes.get(dict["code"], 0) + dict["quantite"]
+            codes[dict["code"]] = totalEssence
 
         elif msg.type == Message.PRINT_POMPE_CARBURANT_DISPONNIBLE:
-            dict = json.loads(msg.contenue)
+            dict = json.loads(msg.contenu)
             carburant = dict["typeCarburant"]
             pompes_disponnible = []
             for pompe in self.pompes:
                 if pompe.type_carburant == carburant and pompe.disponible:
                     pompes_disponnible.append(pompe)
             pompes_disponnible.sort(key=lambda p: p.id) #on trie pour un affiche par id croissant
-            print("Voici les pompes disponnible:")
+            print("Voici les pompes disponnible pour votre type de carburant:")
             for pompe in pompes_disponnible:
                 print(pompe)
+
+        elif msg.type == Message.SERT_CLIENT:
+            client = msg.client
+            if self.pompes[msg.contenu].disponible:
+                t = Thread(target=self.pompes[msg.contenu].gestion_client, args=(client,))
+                t.start()
+            else:
+                print("Pompe non disponnible")
+
         elif msg.type == Message.STOP:
             return False
 

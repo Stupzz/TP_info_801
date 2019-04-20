@@ -1,22 +1,23 @@
 
 from actor import Actor
+from caisses import Caisse
+from pompe import Pompes
 
 if __name__ == '__main__':
     context = dict()
 
-    parts = [Operateur, Transit]
-    objs_parts = []
+    caisse = Caisse(context)
     actor = Actor(context)
+    pompes = Pompes(context, input('Combien de pompes souhaitez vous?'))
+
+    parts = []
+    parts.append(caisse)
+    parts.append(pompes)
 
     for p in parts:
-        objs_parts += [p(context)]
-
-    objs_parts.append(Plateforme(context, input('Combien de train souhaitez vous dans votre gare?')))
-
-    for p in objs_parts:
         p.launch()
 
     actor.run()
 
-    for p in objs_parts:
+    for p in parts:
         p.join()

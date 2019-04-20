@@ -15,30 +15,32 @@ class Caisse(Patron):
         self.codes = []
 
     def run(self):
+        print("Caisse lancé")
         while self.attente_msg():
             pass
 
     def attente_msg(self):
         msg = self.child.recv()
         print(msg)
+
         if msg.type == Message.GET_CODE:
             """
             Demande un code à la caisse pour un quantite voulu. 
             Si le client n'a pas de code, lui en envoie un correspondant à la quantite voulu.
             On demande ensuite à la pompe d'ajouter la quantite voulu pour le code donner.
             """
-            contenue = json.loads(msg.contenue)
+            contenu = json.loads(msg.contenu)
             code = msg.client.code
             if code == None:
                 code = self.genere_code()
                 self.codes.append(code)
-                contenue_json = {"code": code}
-                msg_send = Message(Message.GET_CODE, json.dumps(contenue_json), None)
+                contenu_json = {"code": code}
+                msg_send = Message(Message.GET_CODE, json.dumps(contenu_json), None)
                 self.envoie_message("Actor", msg_send)
                 print(f"Message envoyer vers client depuis la caisse: {msg_send}")
 
-            contenue_json = {"code": code, "typeCarburant": msg.client.carburant, "quantite": contenue["quantite"]}
-            msg_send = Message(Message.GET_CODE, json.dumps(contenue_json), None)
+            contenu_json = {"code": code, "typeCarburant": msg.client.carburant, "quantite": contenu["quantite"]}
+            msg_send = Message(Message.GET_CODE, json.dumps(contenu_json), None)
             self.envoie_message("Pompes", msg_send)
             print(f"Message envoyer vers pompe depuis la caisse: {msg_send}")
 

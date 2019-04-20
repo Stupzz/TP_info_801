@@ -12,7 +12,7 @@ class Actor(Patron):
         self.client_selectionne = None
 
     def run(self):
-        threading.Thread(target=self.get_msg())
+        threading.Thread(target=self.get_msg)
         while self.command():
             sleep(0.2)
 
@@ -21,7 +21,7 @@ class Actor(Patron):
             pass
 
     def command(self):
-        print("Commands: ajoutClient, selectionClient, ajouteCarburantCode, affichePompe, stop?")
+        print("Commands: ajoutClient, selectionClient, ajouteCarburantCode, affichePompe, sertClient, stop?")
         command = input()
 
         if command == 'ajoutClient':
@@ -46,13 +46,25 @@ class Actor(Patron):
             while quantite < 0:
                 print("Veuillez selectionner une quantite superieur à 0")
                 quantite = int(input("Quelle quantite de carburant souhaitez vous?")) - 1
-            contenue_json = {"quantite": quantite}
-            self.envoie_message('Caisse', Message(Message.GET_CODE, json.dumps(contenue_json), self.client_selectionne))
+            contenue = json.dumps({"quantite": quantite})
+            self.envoie_message('Caisse', Message(Message.GET_CODE, contenue, self.client_selectionne))
 
         elif command == 'affichePompe':
             contenue_json = {"typeCarburant": self.client_selectionne.carburant}
-            msg_send = Message(Message.GET_CODE, json.dumps(contenue_json), None)
+            msg_send = Message(Message.PRINT_POMPE_CARBURANT_DISPONNIBLE, json.dumps(contenue_json), None)
             self.envoie_message("Pompes", msg_send)
+
+        elif command == 'sertClient':
+            if self.client_selectionne is None:
+                print("Veuillez d'abbord selectionnez un client.")
+                return
+            contenue_json = {"typeCarburant": self.client_selectionne.carburant}
+            msg_send = Message(Message.PRINT_POMPE_CARBURANT_DISPONNIBLE, json.dumps(contenue_json), None)
+            self.envoie_message("Pompes", msg_send)
+            choix = int(input("Veuillez choisir une pompe"))
+            msg_send = Message(Message.SERT_CLIENT, choix, self.client_selectionne)
+            self.envoie_message("Pompes", msg_send)
+
 
 
         elif command == 'stop':
@@ -67,7 +79,7 @@ class Actor(Patron):
 
     def attente_msg(self):
         msg = self.child.recv()
-        print(msg)
+        print(f"Message dans actor: {msg}")
         if msg.type == Message.GET_CODE:
             dict = json.loads(msg.contenu)
             self.client_selectionne.code = dict["code"]
@@ -155,7 +167,7 @@ class Client():
             return self.nom == other.nom
 
     def __str__(self):
-        return f"{self.nom} a un véhicule pouvant contenir {self.capacite_reservoir} litre de {self.carburant}. Son reservoir est déjà rempli avec {self.quantite_reservoir} litre."
+        return f"{self.nom} a un véhicule pouvant contenir {self.capacite_reservoir} litre de {self.carburant}. Son reservoir est déjà rempli avec {self.quantite_reservoir} litre. Il a pour code: {self.code}"
 
 
 if __name__ == "__main__":
