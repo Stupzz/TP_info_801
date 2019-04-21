@@ -15,13 +15,12 @@ class Caisse(Patron):
         self.codes = []
 
     def run(self):
-        print("Caisse lancé")
         while self.attente_msg():
             pass
 
     def attente_msg(self):
         msg = self.child.recv()
-        print(msg)
+        print(f" Message recu dans Caisse: {msg}")
 
         if msg.type == Message.GET_CODE:
             """
@@ -35,8 +34,8 @@ class Caisse(Patron):
                 code = self.genere_code()
                 self.codes.append(code)
                 contenu_json = {"code": code}
-                msg_send = Message(Message.GET_CODE, json.dumps(contenu_json), None)
-                self.envoie_message("Actor", msg_send)
+                msg_send = Message(Message.GET_CODE_CAISSE, json.dumps(contenu_json), None)
+                self.envoie_message("Clients", msg_send)
                 print(f"Message envoyer vers client depuis la caisse: {msg_send}")
 
             contenu_json = {"code": code, "typeCarburant": msg.client.carburant, "quantite": contenu["quantite"]}

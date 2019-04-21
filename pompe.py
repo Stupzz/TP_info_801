@@ -24,7 +24,6 @@ class Pompes(Patron):
             self.pompes.append(pompe)
 
     def run(self):
-        print("Pompes lancé")
         while self.attente_msg():
             pass
 
@@ -133,7 +132,7 @@ class Pompe:
         print("Annulation")
 
     def __str__(self):
-        return f"Pompe {self.id}"
+        return f"{self.id} - Pompe "
 
 
 

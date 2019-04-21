@@ -2,6 +2,7 @@ import json
 from time import sleep
 from patron import Patron
 from message import Message
+from client import Client
 import threading
 
 
@@ -12,7 +13,6 @@ class Actor(Patron):
         self.client_selectionne = None
 
     def run(self):
-        threading.Thread(target=self.get_msg)
         while self.command():
             sleep(0.2)
 
@@ -21,51 +21,43 @@ class Actor(Patron):
             pass
 
     def command(self):
-        print("Commands: ajoutClient, selectionClient, ajouteCarburantCode, affichePompe, sertClient, stop?")
+        print("Commands: ajoutClient, selectionClient, ajouteCarburantCode, sertClient, stop?")
         command = input()
 
         if command == 'ajoutClient':
-            client = self.creer_client()
-            self.clients.append(client)
-            print(f"Le client suivant vient d'être ajouté: {client}")
+            client = Client.creer_client(self)
+            msg_send = Message(Message.CREER_CLIENT, None, client)
+            self.envoie_message("Clients", msg_send)
+
+        elif command == 'ajoutRapide':
+            client = Client("Mathieu")
+            client.carburant = "diesel"
+            client.capacite_reservoir = 45
+            msg_send = Message(Message.CREER_CLIENT, None, client)
+            self.envoie_message("Clients", msg_send)
 
         elif command == 'selectionClient':
-            for i in range(len(self.clients)):
-                print(f"{i + 1} - {self.clients[i].nom}")
+            msg_send = Message(Message.PRINT_CLIENT, None, None)
+            self.envoie_message("Clients", msg_send)
+            sleep(0.2)
+            choix = input("Veuillez selectionner un client (index)")
+            msg_send = Message(Message.SELECT_CLIENT, choix, None)
+            self.envoie_message("Clients", msg_send)
 
-            choix = int(input("Quel client souhaitez vous selectionner? (index)")) - 1
-            while (choix < 0 and choix >= len(self.clients)):
-                print("Veuillez selectionner un index correct")
-                choix = int(input("Quel client souhaitez vous selectionner? (index)")) - 1
-
-            self.client_selectionne = self.clients[choix]
-            print(f"Vous venez de selectionner {self.client_selectionne.nom}")
 
         elif command == 'ajouteCarburantCode':
             quantite = int(input("Quelle quantite de carburant souhaitez vous?"))
             while quantite < 0:
                 print("Veuillez selectionner une quantite superieur à 0")
-                quantite = int(input("Quelle quantite de carburant souhaitez vous?")) - 1
-            contenue = json.dumps({"quantite": quantite})
-            self.envoie_message('Caisse', Message(Message.GET_CODE, contenue, self.client_selectionne))
+                quantite = int(input("Quelle quantite de carburant souhaitez vous?"))
 
-        elif command == 'affichePompe':
-            contenue_json = {"typeCarburant": self.client_selectionne.carburant}
-            msg_send = Message(Message.PRINT_POMPE_CARBURANT_DISPONNIBLE, json.dumps(contenue_json), None)
-            self.envoie_message("Pompes", msg_send)
+            contenu_json = {"quantite" : quantite}
+            self.envoie_message('Clients', Message(Message.GET_CODE, json.dumps(contenu_json), None))
 
         elif command == 'sertClient':
-            if self.client_selectionne is None:
-                print("Veuillez d'abbord selectionnez un client.")
-                return
-            contenue_json = {"typeCarburant": self.client_selectionne.carburant}
-            msg_send = Message(Message.PRINT_POMPE_CARBURANT_DISPONNIBLE, json.dumps(contenue_json), None)
-            self.envoie_message("Pompes", msg_send)
-            choix = int(input("Veuillez choisir une pompe"))
-            msg_send = Message(Message.SERT_CLIENT, choix, self.client_selectionne)
-            self.envoie_message("Pompes", msg_send)
-
-
+            msg_send = Message(Message.SERT_CLIENT, 0, None)
+            self.envoie_message("Clients", msg_send)
+            sleep(0.2)
 
         elif command == 'stop':
 
@@ -76,99 +68,6 @@ class Actor(Patron):
             return False
 
         return True
-
-    def attente_msg(self):
-        msg = self.child.recv()
-        print(f"Message dans actor: {msg}")
-        if msg.type == Message.GET_CODE:
-            dict = json.loads(msg.contenu)
-            self.client_selectionne.code = dict["code"]
-        elif msg.type == Message.STOP:
-            return False
-
-        return True
-
-    def deja_client(self, client):
-        for c in self.clients:
-            if client == c:
-                return True
-        return False
-
-    def creer_client(self):
-        client = Client(input("Quel nom voulez vous pour votre client?"))
-        while self.deja_client(client):
-            client.nom = input("Nom client déjà utilisé. Quel nom voulez vous pour votre client?")
-
-        carburant = input(f"Quel est le type de carburant qu'utilise le véhicule de {client.nom}? (diesel/essence)")
-        while carburant != "diesel" and carburant != "essence":
-            carburant = input("Veuillez saisir un carburant valide. (diesel/essence)")
-        client.carburant = carburant
-
-        capacite_reservoir = int(input(f"Quel est la capacite de reservoir du véhicule de {client.nom}?"))
-        while capacite_reservoir < 0:
-            capacite_reservoir = int(input("Veuillez saisir une capacité > 0"))
-        client.capacite_reservoir = capacite_reservoir
-
-        choix = input(f"Voulez vous préremplir votre réservoir? (y/n)")
-        while choix != "y" and choix != "n":
-            print("Veuillez saisir une valeure correcte.")
-            choix = input(f"Voulez vous préremplir votre réservoir? (y/n)")
-            print(choix)
-
-        if choix == "y":
-            quantite_reservoir = int(input(f"Quel quantite de carburant vous voulez ajouter?"))
-            while quantite_reservoir < 0:
-                quantite_reservoir = int(input("Veuillez saisir une quantite > 0"))
-            client.ajoute_carburant(quantite_reservoir)
-
-        return client
-
-
-
-
-class Client():
-    def __init__(self, nom):
-        """
-        creer un client, avec un code null
-        :param nom: Nom du client
-        :param capacite_reservoir: la capacité de carburant max du véhicule
-        :param quantite_reservoir: la quantite de carburant déjà présente dans le véhicule
-        """
-        self.nom = nom
-        self.carburant = None
-        self.capacite_reservoir = 0
-        self.quantite_reservoir = 0
-        self.code = None
-        self.attente_pompe = False
-
-    def ajoute_carburant(self, quantite):
-        """
-        :param quantite: int quantite de carburant a ajouter
-        :return: La quantite restante de carburant à ajouter. 0 tout le carburant a été ajouter dans la voiture.
-        """
-        capacite_possible_restante = self.capacite_reservoir - self.quantite_reservoir
-        if capacite_possible_restante < quantite:
-            self.quantite_reservoir = self.capacite_reservoir
-            carburant_code_restant = quantite - capacite_possible_restante
-            print(f'La capacite maximal du véhicule est atteinte, il reste avec votre code: {carburant_code_restant}')
-            return carburant_code_restant
-        else:
-            self.quantite_reservoir += quantite
-            capacite_possible_restante = self.capacite_reservoir - self.quantite_reservoir
-            print(
-                f'Vous venez de remplir votre reservoir avec {quantite} litre de carburant. Il vous reste encore {capacite_possible_restante}')
-            return 0
-
-    def __eq__(self, other):
-        if not isinstance(other, Client):
-            print('Erreur de comparaison, veuillez comparer deux objet de la même class')
-            return NotImplemented
-        else:
-            return self.nom == other.nom
-
-    def __str__(self):
-        return f"{self.nom} a un véhicule pouvant contenir {self.capacite_reservoir} litre de {self.carburant}. Son reservoir est déjà rempli avec {self.quantite_reservoir} litre. Il a pour code: {self.code}"
-
 
 if __name__ == "__main__":
     actor = Actor()

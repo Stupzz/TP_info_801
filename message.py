@@ -8,6 +8,12 @@ class Message:
     PRINT_POMPE_CARBURANT_DISPONNIBLE = "print pompe carburant disponnible"
     SERT_CLIENT = "sert client"
 
+    #client
+    SELECT_CLIENT = "select_client"
+    CREER_CLIENT = "creer_client"
+    GET_CODE_CAISSE = "get_code_caisse"
+    PRINT_CLIENT = "print_client"
+
 
 
     STOP = "stop"
