@@ -6,6 +6,7 @@ from patron import Patron
 from message import Message
 from random import randint
 import json
+from termcolor import cprint
 
 
 class Caisse(Patron):
@@ -20,7 +21,7 @@ class Caisse(Patron):
 
     def attente_msg(self):
         msg = self.child.recv()
-        print(f" Message recu dans Caisse: {msg}")
+        cprint(f"Message recu dans Caisse: {msg}", 'blue')
 
         if msg.type == Message.GET_CODE:
             """
@@ -36,12 +37,10 @@ class Caisse(Patron):
                 contenu_json = {"code": code}
                 msg_send = Message(Message.GET_CODE_CAISSE, json.dumps(contenu_json), None)
                 self.envoie_message("Clients", msg_send)
-                print(f"Message envoyer vers client depuis la caisse: {msg_send}")
 
             contenu_json = {"code": code, "typeCarburant": msg.client.carburant, "quantite": contenu["quantite"]}
             msg_send = Message(Message.GET_CODE, json.dumps(contenu_json), None)
             self.envoie_message("Pompes", msg_send)
-            print(f"Message envoyer vers pompe depuis la caisse: {msg_send}")
 
         elif msg.type == Message.STOP:
             return False

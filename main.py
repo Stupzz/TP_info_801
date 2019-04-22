@@ -10,7 +10,7 @@ if __name__ == '__main__':
     caisse = Caisse(context)
     actor = Actor(context)
     clients = Clients(context)
-    pompes = Pompes(context, input('Combien de pompes souhaitez vous?'))
+    pompes = Pompes(context, input('Combien de pompes souhaitez vous? '))
 
     parts = []
     parts.append(caisse)

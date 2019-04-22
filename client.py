@@ -1,6 +1,7 @@
 from patron import Patron
 from message import Message
 import json
+from termcolor import cprint
 import time
 
 
@@ -17,7 +18,7 @@ class Clients(Patron):
 
     def attente_msg(self):
         msg = self.child.recv()
-        print(f"Message reçu dans Client: {msg}")
+        cprint(f"Message reçu dans Client: {msg}", 'blue')
 
         if msg.type == Message.CREER_CLIENT:
             client = msg.client
@@ -55,18 +56,28 @@ class Clients(Patron):
         elif msg.type == Message.SERT_CLIENT:
             if self.client_selectionne is None:
                 print("Veuillez d'abbord selectionnez un client.")
-                return
+                return True
             contenu_json = {"typeCarburant": self.client_selectionne.carburant}
             msg_send = Message(Message.PRINT_POMPE_CARBURANT_DISPONNIBLE, json.dumps(contenu_json), None)
             self.envoie_message("Pompes", msg_send)
-            time.sleep(0.2)
-            choix = int(input("Veuillez choisir une pompe"))
-            msg_send = Message(Message.SERT_CLIENT, choix, self.client_selectionne)
+
+        elif msg.type == Message.PRINT_CLIENT_SELECTIONNE:
+            print(self.client_selectionne)
+
+        elif msg.type == Message.ENVOIE_DATA_POMPE:
+            if self.client_selectionne.code is None:
+                cprint("ERREUR, Le client ne possède pas de code, veuillez d'abbord passer en caisse", 'red')
+                return True
+            msg_send = Message(Message.SERT_CLIENT, msg.contenu, self.client_selectionne)
             self.envoie_message("Pompes", msg_send)
+
+        elif msg.type == Message.REMPLI_CLIENT:
+            dict = json.loads(msg.contenu)
+            quantite = dict["quantite"]
+            self.client_selectionne.ajoute_carburant(quantite)
 
         elif msg.type == Message.STOP:
             return False
-
         return True
 
     def deja_client(self, client):
@@ -78,8 +89,6 @@ class Clients(Patron):
     def print_client(self):
         for i in range(len(self.clients)):
             print(f"{i + 1} - {self.clients[i].nom}")
-
-
 
 
 class Client():
@@ -95,26 +104,19 @@ class Client():
         self.capacite_reservoir = 0
         self.quantite_reservoir = 0
         self.code = None
-        self.attente_pompe = False
 
     def ajoute_carburant(self, quantite):
         """
         :param quantite: int quantite de carburant a ajouter
-        :return: La quantite restante de carburant à ajouter. 0 tout le carburant a été ajouter dans la voiture.
+        :return: La quantite ajouter.
         """
-        capacite_possible_restante = self.capacite_reservoir - self.quantite_reservoir
-        if capacite_possible_restante < quantite:
+        capacite_possible_max_ajout = self.capacite_reservoir - self.quantite_reservoir
+        if capacite_possible_max_ajout < quantite:
             self.quantite_reservoir = self.capacite_reservoir
-            carburant_code_restant = quantite - capacite_possible_restante
-            print(f'La capacite maximal du véhicule est atteinte, il reste avec votre code: {carburant_code_restant}')
-            return carburant_code_restant
+            return capacite_possible_max_ajout
         else:
             self.quantite_reservoir += quantite
-            capacite_possible_restante = self.capacite_reservoir - self.quantite_reservoir
-            print(
-                f'Vous venez de remplir votre reservoir avec {quantite} litre de carburant. Il vous reste encore {capacite_possible_restante}')
-            return 0
-
+            return quantite
 
     def creer_client(self):
         client = Client(input("Quel nom voulez vous pour votre client?"))
@@ -152,8 +154,7 @@ class Client():
     def __str__(self):
         return f"{self.nom} a un véhicule pouvant contenir {self.capacite_reservoir} litre de {self.carburant}. Son reservoir est déjà rempli avec {self.quantite_reservoir} litre. Il a pour code: {self.code}"
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     clients = Clients()
     client = clients.creer_client()
-

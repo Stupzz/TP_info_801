@@ -13,6 +13,9 @@ class Message:
     CREER_CLIENT = "creer_client"
     GET_CODE_CAISSE = "get_code_caisse"
     PRINT_CLIENT = "print_client"
+    ENVOIE_DATA_POMPE = "envoie data pompe"
+    PRINT_CLIENT_SELECTIONNE = "print client selectionne"
+    REMPLI_CLIENT = "rempli_client"
 
 
 
