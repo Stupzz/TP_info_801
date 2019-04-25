@@ -8,7 +8,7 @@ from message import Message
 from termcolor import cprint
 
 
-SECONDE_ATTENTE_PAR_LITRE = 0.2
+SECONDE_ATTENTE_PAR_LITRE = 0.1
 
 class Pompes(Patron):
 
@@ -57,16 +57,25 @@ class Pompes(Patron):
             if client.capacite_reservoir == client.quantite_reservoir:
                 print("Le client a déjà le plein.")
                 return True
-            if self.pompes[id_pompe].disponible:
-                if self.client_deja_sur_pompe(client):
-                    cprint("ERREUR, Le client n'est pas disponnible, veuillez attendre qu'il ai fini de faire son plein", 'red')
-                    return True
-                if quantite > 0:
-                    self.envoie_message('Clients', Message(Message.REMPLI_CLIENT, msg.contenu, None))
-                    t = Thread(target=self.pompes[id_pompe].sert_client, args=(client, quantite,))
-                    t.start()
+            if id_pompe >= 0 and id_pompe < len(self.pompes):
+
+                if self.pompes[id_pompe].disponible:
+                    if self.client_deja_sur_pompe(client):
+                        cprint("ERREUR, Le client n'est pas disponnible, veuillez attendre qu'il ai fini de faire son plein", 'red')
+                        return True
+                    if quantite > 0:
+                        if client.carburant == self.pompes[id_pompe].type_carburant:
+                            quantite_verse = min(client.max_quantite_possible(), self.pompes[id_pompe].codes[client.code], quantite)  # ici le min permet d'obtenir la quantité à ajouter dans le véhicule
+                            self.envoie_message('Clients', Message(Message.REMPLI_CLIENT, json.dumps({"quantite" : quantite_verse}), None))
+                            t = Thread(target=self.pompes[id_pompe].sert_client, args=(client, quantite_verse,))
+                            t.start()
+                        else:
+                            cprint("Erreur, la pompe choisi ne delivre pas le bon carburant pour votre véhicule", 'red')
+                else:
+                    cprint("Erreur, pompe non disponnible", 'red')
+
             else:
-                print("Pompe non disponnible")
+                cprint("Erreur, veuillez saisir un id valide", 'red')
 
         elif msg.type == Message.STOP:
             return False
@@ -96,20 +105,17 @@ class Pompe:
         self.codes = codes
         self.client = None
 
-    def sert_client(self, client, quantite_souhaite):
+    def sert_client(self, client, quantite):
         self.client = client
         self.disponible = False
-
-        quantite_verse = client.ajoute_carburant(quantite_souhaite) #C'est le client qui s'occupe de verse le carburant
-
-        self.codes[client.code] -= quantite_verse
+        self.codes[client.code] -= quantite
 
         print(f"Le client {client.nom} et la pompe {self.id} ne sont plus disponnible. Remplissage en cours...")
 
-        time.sleep(SECONDE_ATTENTE_PAR_LITRE * quantite_verse)
+        time.sleep(SECONDE_ATTENTE_PAR_LITRE * quantite)
 
         print(f"Le client {client.nom} et la pompe {self.id} sont de nouveau disponnible. Fin du remplissage")
-        print(f"Le client à versé {quantite_verse} dans son véhicule. Il reste donc sur le code {client.code}: {self.codes[client.code]}litre de {client.carburant} disponnible ")
+        print(f"Le client à versé {quantite} dans son véhicule. Il reste donc sur le code {client.code}: {self.codes[client.code]}litre de {client.carburant} disponnible ")
 
         cprint("Commands: ajoutClient, selectionClient, printClient, caisse, sertClient, stop?", "green")
 

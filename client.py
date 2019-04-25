@@ -110,13 +110,21 @@ class Client():
         :param quantite: int quantite de carburant a ajouter
         :return: La quantite ajouter.
         """
-        capacite_possible_max_ajout = self.capacite_reservoir - self.quantite_reservoir
-        if capacite_possible_max_ajout < quantite:
-            self.quantite_reservoir = self.capacite_reservoir
-            return capacite_possible_max_ajout
-        else:
-            self.quantite_reservoir += quantite
-            return quantite
+        # capacite_possible_max_ajout = self.capacite_reservoir - self.quantite_reservoir
+        # if capacite_possible_max_ajout < quantite:
+        #     self.quantite_reservoir = self.capacite_reservoir
+        #     return capacite_possible_max_ajout
+        # else:
+        #     self.quantite_reservoir += quantite
+        self.quantite_reservoir += quantite
+        #    return quantite
+
+    def max_quantite_possible(self):
+        """
+        Nous retourne le nombre en litre de carburant manquant dans le véhicule
+        :return:
+        """
+        return self.capacite_reservoir - self.quantite_reservoir
 
     def creer_client(self):
         client = Client(input("Quel nom voulez vous pour votre client?"))
